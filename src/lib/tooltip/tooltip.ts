@@ -154,6 +154,13 @@ export class MatTooltip implements OnDestroy {
   /** The default delay in ms before hiding the tooltip after hide is called */
   @Input('matTooltipHideDelay') hideDelay =
       this._defaultOptions ? this._defaultOptions.hideDelay : 0;
+      
+  /** 
+   * @FNB: 
+   * If we use the tooltip by component with detached change detection or its child then set this input to true 
+   * in order to trigger detectChanges() when view should be updated.
+   * */
+  @Input('matTooltipSelfChangeDetection') selfChangeDetection = false;
 
   private _message = '';
 
@@ -302,6 +309,8 @@ export class MatTooltip implements OnDestroy {
     const portal = new ComponentPortal(TooltipComponent, this._viewContainerRef);
 
     this._tooltipInstance = overlayRef.attach(portal).instance;
+    
+    this._tooltipInstance.selfChangeDetection = this.selfChangeDetection;
 
     // Dispose of the tooltip when the overlay is detached.
     merge(this._tooltipInstance!.afterHidden(), overlayRef.detachments()).subscribe(() => {
@@ -428,7 +437,12 @@ export class MatTooltip implements OnDestroy {
     // calculate the correct positioning based on the size of the text.
     if (this._tooltipInstance) {
       this._tooltipInstance.message = this.message;
-      this._tooltipInstance._markForCheck();
+      
+      if (!this.selfChangeDetection) {
+        this._tooltipInstance._markForCheck();
+      } else {
+        this._tooltipInstance._detectChanges();
+      }
 
       this._ngZone.onMicrotaskEmpty.asObservable().pipe(take(1)).subscribe(() => {
         if (this._tooltipInstance) {
@@ -442,7 +456,11 @@ export class MatTooltip implements OnDestroy {
   private _setTooltipClass(tooltipClass: string|string[]|Set<string>|{[key: string]: any}) {
     if (this._tooltipInstance) {
       this._tooltipInstance.tooltipClass = tooltipClass;
-      this._tooltipInstance._markForCheck();
+      if (!this.selfChangeDetection) {
+        this._tooltipInstance._markForCheck();
+      } else {
+        this._tooltipInstance._detectChanges();
+      }
     }
   }
 
@@ -495,6 +513,8 @@ export class TooltipComponent {
 
   /** Classes to be added to the tooltip. Supports the same syntax as `ngClass`. */
   tooltipClass: string|string[]|Set<string>|{[key: string]: any};
+  
+  selfChangeDetection: boolean;
 
   /** The timeout ID of any current timer set to show the tooltip */
   _showTimeoutId: number;
@@ -543,7 +563,11 @@ export class TooltipComponent {
 
       // Mark for check so if any parent component has set the
       // ChangeDetectionStrategy to OnPush it will be checked anyways
-      this._markForCheck();
+      if (!this.selfChangeDetection) {
+        this._markForCheck();
+      } else {
+        this._detectChanges();
+      }
     }, delay);
   }
 
@@ -562,7 +586,11 @@ export class TooltipComponent {
 
       // Mark for check so if any parent component has set the
       // ChangeDetectionStrategy to OnPush it will be checked anyways
-      this._markForCheck();
+      if (!this.selfChangeDetection) {
+        this._markForCheck();
+      } else {
+        this._detectChanges();
+      }
     }, delay);
   }
 
@@ -626,5 +654,17 @@ export class TooltipComponent {
    */
   _markForCheck(): void {
     this._changeDetectorRef.markForCheck();
+  }
+  
+  /**
+   * @FNB method
+   */
+  _detectChanges(): void {
+    try {
+        this._changeDetectorRef.detectChanges();
+    } catch(err) {
+         // Prevent from showing this possible error:
+         // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+    }
   }
 }

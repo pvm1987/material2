@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-
+import {ChangeDetectorRef} from '@angular/core';
 import {AnimationEvent} from '@angular/animations';
 import {FocusKeyManager} from '@angular/cdk/a11y';
 import {Direction} from '@angular/cdk/bidi';
@@ -124,6 +124,13 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
     this._yPosition = value;
     this.setPositionClasses();
   }
+  
+  /** 
+   * @FNB: 
+   * If we use the menu by component with detached change detection or its child then set this input to true 
+   * in order to trigger detectChanges() when view should be updated.
+   * */
+  @Input('matMenuSelfChangeDetection') selfChangeDetection = false;
 
   /** @docs-private */
   @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
@@ -189,7 +196,8 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
   constructor(
     private _elementRef: ElementRef,
     private _ngZone: NgZone,
-    @Inject(MAT_MENU_DEFAULT_OPTIONS) private _defaultOptions: MatMenuDefaultOptions) { }
+    @Inject(MAT_MENU_DEFAULT_OPTIONS) private _defaultOptions: MatMenuDefaultOptions,
+    private _changeDetectorRef: ChangeDetectorRef) { }
 
   ngAfterContentInit() {
     this._keyManager = new FocusKeyManager<MatMenuItem>(this.items).withWrap().withTypeAhead();
@@ -293,11 +301,21 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
   /** Starts the enter animation. */
   _startAnimation() {
     this._panelAnimationState = 'enter-start';
+    
+    // @FNB
+    if (this.selfChangeDetection) {
+        this._changeDetectorRef.detectChanges();
+    }
   }
 
   /** Resets the panel animation to its initial state. */
   _resetAnimation() {
     this._panelAnimationState = 'void';
+    
+    // @FNB
+    if (this.selfChangeDetection) {
+        this._changeDetectorRef.detectChanges();
+    }
   }
 
   /** Callback that is invoked when the panel animation completes. */
@@ -305,6 +323,11 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
     // After the initial expansion is done, trigger the second phase of the enter animation.
     if (event.toState === 'enter-start') {
       this._panelAnimationState = 'enter';
+      
+      // @FNB
+      if (this.selfChangeDetection) {
+        this._changeDetectorRef.detectChanges();
+      }
     }
   }
 }
