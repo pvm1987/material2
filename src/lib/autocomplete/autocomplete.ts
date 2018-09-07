@@ -120,6 +120,13 @@ export class MatAutocomplete extends _MatAutocompleteMixinBase implements AfterC
     this._autoActiveFirstOption = coerceBooleanProperty(value);
   }
   private _autoActiveFirstOption: boolean;
+  
+  /** 
+   * @FNB: 
+   * If we use the autocomplete by component with detached change detection or its child then set this input to true 
+   * in order to trigger detectChanges() when view should be updated.
+   * */
+  @Input('matAutocompleteSelfChangeDetection') selfChangeDetection = false;
 
 
   /** Event that is emitted whenever an option from the list is selected. */
@@ -183,7 +190,14 @@ export class MatAutocomplete extends _MatAutocompleteMixinBase implements AfterC
     this.showPanel = !!this.options.length;
     this._classList['mat-autocomplete-visible'] = this.showPanel;
     this._classList['mat-autocomplete-hidden'] = !this.showPanel;
-    this._changeDetectorRef.markForCheck();
+    
+    // @FNB
+    if (!this.selfChangeDetection) {
+        this._changeDetectorRef.markForCheck();
+    } else {
+        this._changeDetectorRef.detectChanges();
+    }
+    
 }
 
   /** Emits the `select` event. */

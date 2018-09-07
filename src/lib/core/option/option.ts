@@ -107,6 +107,13 @@ export class MatOption implements AfterViewChecked {
   @Input()
   get disabled() { return (this.group && this.group.disabled) || this._disabled; }
   set disabled(value: any) { this._disabled = coerceBooleanProperty(value); }
+  
+  /** 
+   * @FNB: 
+   * If we use the autocomplete by component with detached change detection or its child then set this input to true 
+   * in order to trigger detectChanges() when view should be updated.
+   * */
+  @Input('matOptionSelfChangeDetection') selfChangeDetection = false;
 
   /** Whether ripples for the option are disabled. */
   get disableRipple() { return this._parent && this._parent.disableRipple; }
@@ -116,6 +123,9 @@ export class MatOption implements AfterViewChecked {
 
   /** Emits when the state of the option changes and any parents have to be notified. */
   readonly _stateChanges = new Subject<void>();
+  
+  /** @FNB Emits when the active of the option changes and any parents have to be notified. */
+  readonly _activeOptionChanges = new Subject<boolean>();
 
   constructor(
     private _element: ElementRef,
@@ -145,14 +155,38 @@ export class MatOption implements AfterViewChecked {
   /** Selects the option. */
   select(): void {
     this._selected = true;
-    this._changeDetectorRef.markForCheck();
+    
+    // @FNB
+    if (!this.selfChangeDetection) {
+        this._changeDetectorRef.markForCheck();
+    } else {
+        try {
+          this._changeDetectorRef.detectChanges();
+        } catch(err) {
+             // Prevent from showing this possible error:
+             // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+        }
+    }
+    
     this._emitSelectionChangeEvent();
   }
 
   /** Deselects the option. */
   deselect(): void {
     this._selected = false;
-    this._changeDetectorRef.markForCheck();
+    
+    // @FNB
+    if (!this.selfChangeDetection) {
+        this._changeDetectorRef.markForCheck();
+    } else {
+        try {
+            this._changeDetectorRef.detectChanges();
+        } catch(err) {
+             // Prevent from showing this possible error:
+             // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+        }
+    }
+    
     this._emitSelectionChangeEvent();
   }
 
@@ -173,7 +207,18 @@ export class MatOption implements AfterViewChecked {
   setActiveStyles(): void {
     if (!this._active) {
       this._active = true;
-      this._changeDetectorRef.markForCheck();
+      
+      // @FNB
+      if (!this.selfChangeDetection) {
+          this._changeDetectorRef.markForCheck();
+      } else {
+          this._activeOptionChanges.next(this._active);
+          try {
+              this._changeDetectorRef.detectChanges();
+          } catch(err) {
+              
+          }
+      }
     }
   }
 
@@ -185,7 +230,17 @@ export class MatOption implements AfterViewChecked {
   setInactiveStyles(): void {
     if (this._active) {
       this._active = false;
-      this._changeDetectorRef.markForCheck();
+      // @FNB
+      if (!this.selfChangeDetection) {
+          this._changeDetectorRef.markForCheck();
+      } else {
+          this._activeOptionChanges.next(this._active);
+          try {
+              this._changeDetectorRef.detectChanges();
+          } catch(err) {
+              
+          }
+      }
     }
   }
 
@@ -211,7 +266,13 @@ export class MatOption implements AfterViewChecked {
   _selectViaInteraction(): void {
     if (!this.disabled) {
       this._selected = this.multiple ? !this._selected : true;
-      this._changeDetectorRef.markForCheck();
+      
+      // @FNB
+      if (!this.selfChangeDetection) {
+          this._changeDetectorRef.markForCheck();
+      } else {
+          this._changeDetectorRef.detectChanges();
+      }
       this._emitSelectionChangeEvent(true);
     }
   }
