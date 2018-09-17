@@ -304,7 +304,12 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
     
     // @FNB
     if (this.selfChangeDetection) {
-        this._changeDetectorRef.detectChanges();
+        try {
+          this._changeDetectorRef.detectChanges();
+        } catch(err) {
+             // Prevent from showing this possible error:
+             // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+        }
     }
   }
 
@@ -314,7 +319,12 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
     
     // @FNB
     if (this.selfChangeDetection) {
-        this._changeDetectorRef.detectChanges();
+        try {
+          this._changeDetectorRef.detectChanges();
+        } catch(err) {
+             // Prevent from showing this possible error:
+             // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+        }
     }
   }
 
@@ -326,7 +336,12 @@ export class MatMenu implements AfterContentInit, MatMenuPanel, OnDestroy {
       
       // @FNB
       if (this.selfChangeDetection) {
-        this._changeDetectorRef.detectChanges();
+        try {
+          this._changeDetectorRef.detectChanges();
+        } catch(err) {
+             // Prevent from showing this possible error:
+             // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+        }
       }
     }
   }

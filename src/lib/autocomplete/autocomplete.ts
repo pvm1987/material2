@@ -195,7 +195,12 @@ export class MatAutocomplete extends _MatAutocompleteMixinBase implements AfterC
     if (!this.selfChangeDetection) {
         this._changeDetectorRef.markForCheck();
     } else {
-        this._changeDetectorRef.detectChanges();
+        try {
+          this._changeDetectorRef.detectChanges();
+        } catch(err) {
+             // Prevent from showing this possible error:
+             // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+        }
     }
     
 }
