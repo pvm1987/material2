@@ -1,0 +1,2 @@
+cd C:\xampp\htdocs\material2
+gulp material:build-release && cd dist\releases\material && npm pack && move angular-material-5.2.5.tgz C:\xampp\htdocs\core-scrum\ng\core\exported-libs && cd C:\xampp\htdocs\inbox-scrum\ng\inbox && npm install @angular/material && pause
