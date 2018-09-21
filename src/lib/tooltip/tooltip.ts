@@ -338,6 +338,11 @@ export class MatTooltip implements OnDestroy {
     strategy.withScrollableContainers(scrollableAncestors);
 
     strategy.onPositionChange.subscribe(change => {
+      // @FNB fix for clipped tooltips on the left side of the viewport
+      if (this._overlayRef != null && this._overlayRef.overlayElement.style.left != null && parseInt(this._overlayRef.overlayElement.style.left, 10) < 0) {
+          this._overlayRef.overlayElement.style.left = '0px';
+      }
+      
       if (this._tooltipInstance) {
         if (change.scrollableViewProperties.isOverlayClipped && this._tooltipInstance.isVisible()) {
           // After position changes occur and the overlay is clipped by
