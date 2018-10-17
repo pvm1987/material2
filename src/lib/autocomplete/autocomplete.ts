@@ -132,7 +132,13 @@ export class MatAutocomplete extends _MatAutocompleteMixinBase implements AfterC
   /** Event that is emitted whenever an option from the list is selected. */
   @Output() readonly optionSelected: EventEmitter<MatAutocompleteSelectedEvent> =
       new EventEmitter<MatAutocompleteSelectedEvent>();
-
+      
+  /** Event that is emitted when the autocomplete panel is opened. */
+  @Output() readonly opened: EventEmitter<void> = new EventEmitter<void>();
+  
+  /** Event that is emitted when the autocomplete panel is closed. */
+  @Output() readonly closed: EventEmitter<void> = new EventEmitter<void>();
+  
   /**
    * Takes classes set on the host mat-autocomplete element and applies them to the panel
    * inside the overlay container to allow for easy styling.
@@ -166,7 +172,7 @@ export class MatAutocomplete extends _MatAutocompleteMixinBase implements AfterC
 
   ngAfterContentInit() {
     this._keyManager = new ActiveDescendantKeyManager<MatOption>(this.options).withWrap();
-    // Set the initial visibiity state.
+    // Set the initial visibility state.
     this._setVisibility();
   }
 
