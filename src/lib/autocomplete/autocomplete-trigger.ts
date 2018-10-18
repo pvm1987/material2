@@ -149,7 +149,10 @@ export class MatAutocompleteTrigger implements ControlValueAccessor, OnDestroy {
 
   /** The autocomplete panel to be attached to this trigger. */
   @Input('matAutocomplete') autocomplete: MatAutocomplete;
-
+     
+  /** Whether or not autocomplete panel should have backdrop. */
+  @Input('matAutocompleteHasBackdrop') matAutocompleteHasBackdrop = false;
+  
   constructor(private _element: ElementRef, private _overlay: Overlay,
               private _viewContainerRef: ViewContainerRef,
               private _zone: NgZone,
@@ -517,10 +520,15 @@ export class MatAutocompleteTrigger implements ControlValueAccessor, OnDestroy {
       positionStrategy: this._getOverlayPosition(),
       scrollStrategy: this._scrollStrategy(),
       width: this._getHostWidth(),
-      direction: this._dir ? this._dir.value : 'ltr'
+      direction: this._dir ? this._dir.value : 'ltr',
+      hasBackdrop: this._hasBackdropEnabled()
     });
   }
-
+ 
+  private _hasBackdropEnabled() {
+      return !!this.matAutocompleteHasBackdrop;
+  }
+  
   private _getOverlayPosition(): PositionStrategy {
     this._positionStrategy = this._overlay.position().connectedTo(
         this._getConnectedElement(),
