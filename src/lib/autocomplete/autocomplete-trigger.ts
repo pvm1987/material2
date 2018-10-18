@@ -522,7 +522,7 @@ export class MatAutocompleteTrigger implements ControlValueAccessor, OnDestroy {
       width: this._getHostWidth(),
       direction: this._dir ? this._dir.value : 'ltr',
       hasBackdrop: this._hasBackdropEnabled(),
-      backdropClass: ''
+      backdropClass: this._hasBackdropEnabled() ? '' : undefined,
     });
   }
  
