@@ -198,6 +198,15 @@ export class MatAutocomplete extends _MatAutocompleteMixinBase implements AfterC
     this._classList['mat-autocomplete-hidden'] = !this.showPanel;
     
     // @FNB
+    if (this.showPanel) {
+        // An autocomplete panel is visible, emit .opened() event.
+        this.opened.emit();
+    } else {
+        // An autocomplete panel is not visible, emit .closed() event.
+        this.closed.emit();
+    }
+    
+    // @FNB
     if (!this.selfChangeDetection) {
         this._changeDetectorRef.markForCheck();
     } else {
