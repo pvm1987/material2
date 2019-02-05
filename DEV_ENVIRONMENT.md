@@ -6,7 +6,7 @@
 4. Clone your fork. 
    Recommendation: name your git remotes `upstream` for `angular/material2`
    and `<your-username>` for your fork. Also see the [team git shortcuts](https://github.com/angular/material2/wiki/Team-git----bash-shortcuts).
-5. From the root of the project, run `npm install`.
+5. From the root of the project, run `npm ci` (the difference between `npm ci` and `npm i` is that the first will strictly use packages declared in `package-lock.json`)
 
 
 To build Material in dev mode, run `gulp material:build`.
