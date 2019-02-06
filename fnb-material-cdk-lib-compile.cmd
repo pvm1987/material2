@@ -1,0 +1,2 @@
+cd C:\xampp\htdocs\material2
+gulp cdk:build-release && cd dist\releases\cdk && npm pack && move angular-cdk-5.2.5.tgz C:\xampp\htdocs\core-scrum\ng\core\exported-libs && cd C:\xampp\htdocs\inbox-scrum\ng\inbox && npm install @angular/cdk && pause

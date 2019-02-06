@@ -9,6 +9,7 @@
 import {PositionStrategy} from './position-strategy';
 import {ElementRef} from '@angular/core';
 import {ViewportRuler} from '@angular/cdk/scrolling';
+import {coerceArray} from '@angular/cdk/coercion';
 import {
   ConnectionPositionPair,
   OriginConnectionPosition,
@@ -72,7 +73,10 @@ export class ConnectedPositionStrategy implements PositionStrategy {
   private _positionLocked = false;
 
   private _onPositionChange = new Subject<ConnectedOverlayPositionChange>();
-
+  
+  /** Keeps track of the CSS classes that the position strategy has applied on the overlay panel. */
+  private _appliedPanelClasses: string[] = [];
+  
   /** Emits an event when the connection point changes. */
   get onPositionChange(): Observable<ConnectedOverlayPositionChange> {
     return this._onPositionChange.asObservable();
@@ -109,6 +113,7 @@ export class ConnectedPositionStrategy implements PositionStrategy {
 
   /** @docs-private */
   detach() {
+    this._clearPanelClasses();
     this._applied = false;
     this._resizeSubscription.unsubscribe();
   }
@@ -126,7 +131,9 @@ export class ConnectedPositionStrategy implements PositionStrategy {
       this.recalculateLastPosition();
       return;
     }
-
+    
+    this._clearPanelClasses();
+    
     this._applied = true;
 
     // We need the bounding rects for the origin and the overlay to determine how to position
@@ -392,11 +399,15 @@ export class ConnectedPositionStrategy implements PositionStrategy {
       overlayRect: ClientRect,
       overlayPoint: Point,
       pos: ConnectionPositionPair) {
-
+      
+    if (pos.panelClass) {
+      this._addPanelClasses(pos.panelClass);
+    }
+    
     // We want to set either `top` or `bottom` based on whether the overlay wants to appear above
     // or below the origin and the direction in which the element will expand.
     let verticalStyleProperty = pos.overlayY === 'bottom' ? 'bottom' : 'top';
-
+    
     // When using `bottom`, we adjust the y position such that it is the distance
     // from the bottom of the viewport rather than the top.
     let y = verticalStyleProperty === 'top' ?
@@ -441,6 +452,26 @@ export class ConnectedPositionStrategy implements PositionStrategy {
     return overflows.reduce((currentValue: number, currentOverflow: number) => {
       return currentValue - Math.max(currentOverflow, 0);
     }, length);
+  }
+  
+  /** Adds a single CSS class or an array of classes on the overlay panel. */
+  private _addPanelClasses(cssClasses: string | string[]) {
+    if (this._pane) {
+      coerceArray(cssClasses).forEach(cssClass => {
+        if (this._appliedPanelClasses.indexOf(cssClass) === -1) {
+          this._appliedPanelClasses.push(cssClass);
+          this._pane.classList.add(cssClass);
+        }
+      });
+    }
+  }
+  
+  /** Clears the classes that the position strategy has applied from the overlay panel. */
+  private _clearPanelClasses() {
+    if (this._pane) {
+      this._appliedPanelClasses.forEach(cssClass => this._pane.classList.remove(cssClass));
+      this._appliedPanelClasses = [];
+    }
   }
 }
 

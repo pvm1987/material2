@@ -24,6 +24,7 @@ export interface OriginConnectionPosition {
 export interface OverlayConnectionPosition {
   overlayX: HorizontalConnectionPos;
   overlayY: VerticalConnectionPos;
+  panelClass?: string | string [];
 }
 
 /** The points of the origin element and the overlay element to connect. */
@@ -36,6 +37,8 @@ export class ConnectionPositionPair {
   overlayX: HorizontalConnectionPos;
   /** Y-axis attachment point for connected overlay. Can be 'top', 'bottom', or 'center'. */
   overlayY: VerticalConnectionPos;
+  /** Class(es) to be applied to the panel while this position is active. */
+  panelClass: string | string [];
 
   constructor(
     origin: OriginConnectionPosition,
@@ -47,6 +50,10 @@ export class ConnectionPositionPair {
     this.originY = origin.originY;
     this.overlayX = overlay.overlayX;
     this.overlayY = overlay.overlayY;
+    
+    if (overlay.panelClass) {
+        this.panelClass = overlay.panelClass;
+    }
   }
 }
 
