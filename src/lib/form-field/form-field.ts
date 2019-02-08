@@ -100,7 +100,14 @@ let nextUniqueId = 0;
 export class MatFormField extends _MatFormFieldMixinBase
     implements AfterContentInit, AfterContentChecked, AfterViewInit, CanColor {
   private _labelOptions: LabelOptions;
-
+  
+  /** 
+   * @FNB: 
+   * If we use the mat form field by component with detached change detection or its child then set this input to true 
+   * in order to trigger detectChanges() when view should be updated.
+   * */
+  @Input('matFormFieldSelfChangeDetection') selfChangeDetection = false;
+  
   /**
    * @deprecated Use `color` instead.
    * @deletion-target 6.0.0
@@ -158,7 +165,17 @@ export class MatFormField extends _MatFormFieldMixinBase
   set floatLabel(value: FloatLabelType) {
     if (value !== this._floatLabel) {
       this._floatLabel = value || this._labelOptions.float || 'auto';
-      this._changeDetectorRef.markForCheck();
+      // @FNB
+      if (!this.selfChangeDetection) {
+           this._changeDetectorRef.markForCheck();
+      } else {
+           try {
+             this._changeDetectorRef.detectChanges();
+           } catch(err) {
+                // Prevent from showing this possible error:
+                // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+           }
+       }
     }
   }
   private _floatLabel: FloatLabelType;
@@ -197,26 +214,67 @@ export class MatFormField extends _MatFormFieldMixinBase
     this._control.stateChanges.pipe(startWith(null!)).subscribe(() => {
       this._validatePlaceholders();
       this._syncDescribedByIds();
-      this._changeDetectorRef.markForCheck();
+      
+      // @FNB
+      if (!this.selfChangeDetection) {
+           this._changeDetectorRef.markForCheck();
+      } else {
+           try {
+             this._changeDetectorRef.detectChanges();
+           } catch(err) {
+                // Prevent from showing this possible error:
+                // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+           }
+       }
     });
 
     let ngControl = this._control.ngControl;
     if (ngControl && ngControl.valueChanges) {
       ngControl.valueChanges.subscribe(() => {
-        this._changeDetectorRef.markForCheck();
+        // @FNB
+        if (!this.selfChangeDetection) {
+             this._changeDetectorRef.markForCheck();
+        } else {
+             try {
+               this._changeDetectorRef.detectChanges();
+             } catch(err) {
+                  // Prevent from showing this possible error:
+                  // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+             }
+         }
       });
     }
 
     // Re-validate when the number of hints changes.
     this._hintChildren.changes.pipe(startWith(null)).subscribe(() => {
       this._processHints();
-      this._changeDetectorRef.markForCheck();
+      // @FNB
+      if (!this.selfChangeDetection) {
+           this._changeDetectorRef.markForCheck();
+      } else {
+           try {
+             this._changeDetectorRef.detectChanges();
+           } catch(err) {
+                // Prevent from showing this possible error:
+                // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+           }
+       }
     });
 
     // Update the aria-described by when the number of errors changes.
     this._errorChildren.changes.pipe(startWith(null)).subscribe(() => {
       this._syncDescribedByIds();
-      this._changeDetectorRef.markForCheck();
+      // @FNB
+      if (!this.selfChangeDetection) {
+           this._changeDetectorRef.markForCheck();
+      } else {
+           try {
+             this._changeDetectorRef.detectChanges();
+           } catch(err) {
+                // Prevent from showing this possible error:
+                // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+           }
+       }
     });
   }
 
@@ -272,8 +330,17 @@ export class MatFormField extends _MatFormFieldMixinBase
       fromEvent(this._label.nativeElement, 'transitionend').pipe(take(1)).subscribe(() => {
         this._showAlwaysAnimate = false;
       });
-
-      this._changeDetectorRef.markForCheck();
+      // @FNB
+      if (!this.selfChangeDetection) {
+           this._changeDetectorRef.markForCheck();
+      } else {
+           try {
+             this._changeDetectorRef.detectChanges();
+           } catch(err) {
+                // Prevent from showing this possible error:
+                // Error: ViewDestroyedError: Attempt to use a destroyed view: detectChanges
+           }
+       }
     }
   }
 
